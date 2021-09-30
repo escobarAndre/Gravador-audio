@@ -2,6 +2,7 @@
   var mediaRecorder;
   var status = "";
   var record = 1;
+  var records = []
 
   navigator.mediaDevices
     .getUserMedia({ audio: true, video: false })
@@ -20,32 +21,16 @@
         chunks = [];
 
         const audioURL = URL.createObjectURL(blob);
-        const audio = document.createElement("audio");
-        audio.src = audioURL;
-        audio.controls = true;
-
-        const btn = document.createElement("button");
-        btn.innerHTML = "Excluir";
-
-        const p = document.createElement("p");
-        p.innerHTML = `Gravação ${record++}`;
-
-        const div = document.createElement("div");
-        div.style = 'display: flex; align-items: center; justify-content: center; width: auto; height: auto; margin: 0 auto;'
-        div.appendChild(p);
-        div.appendChild(audio);
-        div.appendChild(btn);
-
-
-        const divAll = document.getElementById('AllRecords')
-        divAll.appendChild(div)
+        
+        records = [
+          ...records, {src: audioURL, gravação: record++}
+        ]
         
       };
     });
 
   function start() {
     mediaRecorder.start();
-
     status = "Recording";
   }
 
@@ -53,19 +38,37 @@
     mediaRecorder.stop();
     status = "";
   }
+
+  function del(index) {
+    records.splice(index, 1)
+    records = records
+    console.log('work')
+  }
+
 </script>
 
 <main>
   <div id="record">
     <h1>Gravador de áudio</h1>
     <div id="btns">
-      <button on:click={start}>Gravar</button>
+      <button on:click={(start)}>Gravar</button>
       <button on:click={stop}>Parar</button>
       {#if status === "Recording"}
         <p id="recording">Gravando</p>
       {:else}
         <p>Aguardando</p>
       {/if}
+    </div>
+    <div id="AllRecords">
+      {#each records as item, i}
+        <div id="records" >
+          <p>Gravação {item.gravação}</p>
+          <audio controls src="{item.src}">
+            <track kind="captions">
+          </audio>
+          <button on:click={() => del(i)}>Excluir</button>
+        </div>
+      {/each} 
     </div>
     <div id="AllRecords" />
   </div>
